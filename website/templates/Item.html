@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head> 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BmbxuPwQa2lc/FVzBcNJ7UAyJxM6wuqIj61tLrc4wSX0szH/Ev+nYRRuWlolflfl" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css')}}"?v=<?=time();?>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" >
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<meta http-equiv="cache-control" content="max-age=0" />
+	<meta http-equiv="cache-control" content="no-cache" />
+	<meta http-equiv="expires" content="0" />
+	<meta http-equiv="expires" content="Tue, 01 Jan 1980 1:00:00 GMT" />
+	<meta http-equiv="pragma" content="no-cache" />
+
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script><title>Document</title>
+
+</head>
+<body>
+
+
+	<div class="icon"></div>
+	<nav>
+	<h1></h1>
+	<ul>
+		<li><a href="{{ url_for('home')}}">Home</a></li>
+		<li><a href="{{ url_for('about')}}">About</a></li>
+		<li><a href="{{ url_for('product')}}">Product</a></li>
+		{% if session["username"] %}
+			<li><a href="{{ url_for('account')}}">Logout</a></li>
+		{% else %}
+			<li><a href="{{ url_for('account')}}">Login</a></li>
+		{% endif %}		
+		<li><a href="{{ url_for('cart')}}">Cart</a></li>
+	</ul>
+	
+
+	<div class="clear"></div>
+</nav>
+</br>
+</br>
+
+
+
+	<div class="item">
+		<form method="post" action="/add_to_cart/{{display_item.pid}}">
+			<h2>{{ display_item.title }}</h2>
+			<img  src="../static/pic/prop/{{display_item.image}}">
+			<span><h3>Price per piece:</h3></span>
+			<span><h3><p> $ {{ display_item.price }} </p></h3></span>
+			<h4> </h4>
+			<span><button type="button" onclick="plusOne()"><h2>+</h2></button></span>
+			<span><input type="text" id="quantity" name="quantity" value="1" readonly></span>
+			<span><button type="button" onclick="minusOne()"><h2>-</h2></button></span>
+			<input type="text" id="productTitle", name="productTitle" value={{display_item.title}} hidden>
+			<input type="text" id="unitPrice", name="unitPrice" value={{display_item.price}} hidden>
+			<br>
+			<br>
+			<br>
+			<input type="submit" value="Add to Cart"/>
+			<br>
+			<br>
+			<br>
+		</form>
+	</div>
+
+	<script>
+		function plusOne() {
+			var qty = document.getElementById("quantity").value;
+			if (+qty >= 1) {
+				qty = +qty + 1;
+			} else {
+				qty = 1;
+			}
+			document.getElementById("quantity").value = qty;
+		}
+		function minusOne() {
+			var qty = document.getElementById("quantity").value;
+			if (+qty > 2) {
+				qty = +qty - 1;
+			} else {
+				qty = 1;
+			}
+			document.getElementById("quantity").value = qty;
+		}
+	</script>
+
+	<div class="icon2">
+		<a href="https://www.youtube.com/watch?v=z6yprwC16_M" class="Youtube">Youtube<i class="fab fa-youtube"></i></a>
+    </div>
+</body>
+</html>
