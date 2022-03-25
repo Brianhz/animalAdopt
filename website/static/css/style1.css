@@ -78,7 +78,7 @@
    background-size: cover;
 }  
 
-/*.icon{
+.icon{
     top: 0;
     left: 0;
    width: 100px;
@@ -90,8 +90,7 @@
    position: absolute;
    top: 12px;
    left: 0px;
-}*/
-
+}
 /*icon2*/
 .icon2{
    position: fixed;
@@ -505,23 +504,3 @@ nav li {
     margin: 0;
     padding: 0;
 }
-
-.bd-placeholder-img {
-    font-size: 1.125rem;
-    text-anchor: middle;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    user-select: none;
-  }
-
-  @media (min-width: 768px) {
-    .bd-placeholder-img-lg {
-      font-size: 3.5rem;
-    }
-  }
-
-  .navbar-brand {
-    height:70px ;
-    font-weight: 70px;
-
-  }

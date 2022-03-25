@@ -16,14 +16,10 @@ admin = Admin(app)
 
 @app.route('/')
 
-@app.route('/p')
-def p():
-    return render_template('p.html')
-
 @app.route("/home")
 def home():
     #return "Home Page"#
-    return render_template('Home.html')
+    return render_template('p.html')
 
 @app.route("/about")
 def about():
@@ -47,7 +43,6 @@ def wanted():
 
 if __name__ == '__main__':
         app.run(debug=True, port=8000)
-
 
 s = HTMLSession()
 r = s.get(url)
