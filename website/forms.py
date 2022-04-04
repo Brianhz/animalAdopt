@@ -32,4 +32,10 @@ class PostForm(FlaskForm):
     content = StringField('Remember Me')
     submit = SubmitField('Submit')
 
-
+class LostForm(FlaskForm):
+    username = StringField('Username',
+                            validators=[DataRequired(), Length(min=2, max=20)])
+    img = StringField('Image', validators=[DataRequired()])
+    title = StringField('Password', validators=[DataRequired()])
+    description = StringField('Remember Me')
+    submit = SubmitField('Submit')

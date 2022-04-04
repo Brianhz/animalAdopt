@@ -59,8 +59,8 @@
   </head>
   <body>
     
-<!--
-    <nav>
+
+    <!--nav>
         <h1></h1>
     <ul>
       <li><a href="{{ url_for('home')}}">Home</a></li>
@@ -74,11 +74,11 @@
       <li><a href="{{ url_for('cart')}}">Cart</a></li>
     </ul>
     <div class="clear"></div>
-    </nav>
-    <div class=thank>
-        <{% extends "layout.html" %}-->
+    </nav-->
+    <!--div class=thank-->
+        {#{% extends "layout.html" %}#}
     <!--/div-->
-        <!--{% block body %}-->
+        {#{% block body %}#}
 
 <header>
   <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
@@ -99,8 +99,15 @@
             <!--a class="nav-link" href="{{ url_for('about')}}">About</a-->
           </li>
           <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="{{ url_for('wanted')}}">Lost</a>
+          </li>
+          <li class="nav-item">
             <a class="nav-link" aria-current="page" href="{{ url_for('product')}}">Product</a>
           </li>
+          {% if current_user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="{{ url_for('admin')}}">Admin</a>
+          {% endif %}
           {% if session["username"] %}
           <li class="nav-item">
             <a class="nav-link" aria-current="page" href="{{ url_for('account')}}">Logout</a>
@@ -124,7 +131,7 @@
         {% extends "layout.html" %}
         </div>
         {% block body %}
-        <!--{% endblock %}-->
+        {#{% endblock %}#}
         <!--form class="d-flex">
           <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
           <button class="btn btn-outline-success" type="submit">Search</button>
@@ -157,10 +164,10 @@
         <svg class="bd-placeholder-img" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false"><rect width="100%" height="100%" fill="#777"/></svg>
 
         <div class="container">
-          <div class="carousel-caption text-start">
-            <h1>Example headline.</h1>
-            <p>Some representative placeholder content for the first slide of the carousel.</p>
-            <p><a class="btn btn-lg btn-primary" href="#">Sign up today</a></p>
+          <div class="carousel-caption">
+            <h1>We care about your pets.</h1>
+            <h3>Please do not throw your pet away!!!</h3>
+            <p><a class="btn btn-lg btn-primary" href="{{ url_for('account')}}">Sign up</a></p>
           </div>
         </div>
       </div>
@@ -169,9 +176,9 @@
 
         <div class="container">
           <div class="carousel-caption">
-            <h1>Another example headline.</h1>
-            <p>Some representative placeholder content for the second slide of the carousel.</p>
-            <p><a class="btn btn-lg btn-primary" href="#">Learn more</a></p>
+            <h1>Help for all living things.</h1>
+            <h3>Please share your dog's information if you lost it, let us help!!!</h3>
+            <p><a class="btn btn-lg btn-primary" href="{{ url_for('account')}}">Sign up</a></p>
           </div>
         </div>
       </div>
@@ -179,10 +186,10 @@
         <svg class="bd-placeholder-img" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" preserveAspectRatio="xMidYMid slice" focusable="false"><rect width="100%" height="100%" fill="#777"/></svg>
 
         <div class="container">
-          <div class="carousel-caption text-end">
-            <h1>One more for good measure.</h1>
-            <p>Some representative placeholder content for the third slide of this carousel.</p>
-            <p><a class="btn btn-lg btn-primary" href="#">Browse gallery</a></p>
+          <div class="carousel-caption">
+            <h1>We are in love with pets and animals.</h1>
+            <h3>Please do not hurt them!!!</h3>
+            <p><a class="btn btn-lg btn-primary" href="{{ url_for('account')}}">Sign up</a></p>
           </div>
         </div>
       </div>
@@ -197,40 +204,40 @@
     </button>
   </div>
 
-
-
-
-
   <!-- Marketing messaging and featurettes
   ================================================== -->
   <!-- Wrap the rest of the page in another container to center all the content. -->
 
-  <div class="container marketing">
+  <<div class="container marketing">
 
-    <!-- Three columns of text below the carousel -->
+    <!--Three columns of text below the carousel -->
     <div class="row">
       <div class="col-lg-4">
         <svg class="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"/><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg>
 
         <h2>Heading</h2>
-        <p>Some representative placeholder content for the three columns of text below the carousel. This is the first column.</p>
-        <p><a class="btn btn-secondary" href="#">View details &raquo;</a></p>
+        <!--p>Some representative placeholder content for the three columns of text below the carousel. This is the first column.</p-->
+        <!--p><a class="btn btn-secondary" href="#">View details &raquo;</a></p-->
       </div><!-- /.col-lg-4 -->
       <div class="col-lg-4">
         <svg class="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"/><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg>
 
         <h2>Heading</h2>
-        <p>Another exciting bit of representative placeholder content. This time, we've moved on to the second column.</p>
-        <p><a class="btn btn-secondary" href="#">View details &raquo;</a></p>
+        <!--p>Another exciting bit of representative placeholder content. This time, we've moved on to the second column.</p-->
+        <!--p><a class="btn btn-secondary" href="#">View details &raquo;</a></p-->
       </div><!-- /.col-lg-4 -->
       <div class="col-lg-4">
         <svg class="bd-placeholder-img rounded-circle" width="140" height="140" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: 140x140" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#777"/><text x="50%" y="50%" fill="#777" dy=".3em">140x140</text></svg>
 
         <h2>Heading</h2>
-        <p>And lastly this, the third column of representative placeholder content.</p>
-        <p><a class="btn btn-secondary" href="#">View details &raquo;</a></p>
+        <!--p>And lastly this, the third column of representative placeholder content.</p-->
+        <!--p><a class="btn btn-secondary" href="#">View details &raquo;</a></p-->
       </div><!-- /.col-lg-4 -->
     </div><!-- /.row -->
+
+
+
+
 
 
     <!-- START THE FEATURETTES -->
@@ -284,7 +291,7 @@
   <!-- FOOTER -->
   <footer class="container">
     <p class="float-end"><a href="#">Back to top</a></p>
-    <p>&copy; 2017–2021 Company, Inc. &middot; <a href="#">Privacy</a> &middot; <a href="#">Terms</a></p>
+    <p>&copy;2022 Company, Inc. &middot; All Right Reserve </p>
   </footer>
 </main>
 
