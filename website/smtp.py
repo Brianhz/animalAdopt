@@ -8,7 +8,7 @@ from email.message import EmailMessage
 # Email_ADDRESS = os.environ.get('EMAIL_USER')
 # Email_PASSWORD = os.environ.get('EMAIL_PASS')
 Email_ADDRESS = "brian.test10000@gmail.com"
-Email_PASSWORD = "brian10000"
+Email_PASSWORD = "brian.10000"
 
 
 msg = EmailMessage()
@@ -45,7 +45,7 @@ with smtplib.SMTP('smtp.gmail.com', 587) as smtp:
     if errorFound:
         print('No action since login smtp server failed')
     else:
-        subject = 'test1'
-        body = 'test2'
+        subject = 'test for brian'
+        body = 'test for brian on 2022-04-05'
         msg = f'Subject: {subject}\n\n{body}'
         smtp.sendmail(Email_ADDRESS, 'anthony.1120.h@gmail.com', msg)
