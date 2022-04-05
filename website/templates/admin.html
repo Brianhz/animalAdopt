@@ -63,7 +63,7 @@
           </li>
           {% if current_user.is_authenticated %}
           <li class="nav-item">
-            <a class="nav-link" aria-current="page" href="{{ url_for('admin')}}">Admin</a>
+            <a class="nav-link" aria-current="page" href="{{ url_for('admin1')}}">Admin</a>
           {% endif %}
           {% if session["username"] %}
           <li class="nav-item">
@@ -90,5 +90,6 @@
         {% block body %}
 
     </div>
+        {% endblock %}
   </nav>
 </header>

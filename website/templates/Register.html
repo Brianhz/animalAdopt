@@ -92,7 +92,7 @@
     <div class="registerbox">
     <h1>Register</h1>
 
-    <form method="POST">
+    <form method ="POST">
         <p>Username</p>
         <input type="text" name="username" placeholder="Enter Username" value="asd">
         <p>Password</p>
@@ -109,6 +109,26 @@
     <div class="icon2">
         <a href="https://www.youtube.com/watch?v=z6yprwC16_M" class="Youtube">Youtube<i class="fab fa-youtube"></i></a>
     </div>
+
+
+    <!--form onsubmit="sendEmail(); reset(); return false;"-->
+    <!--script src="http://smtpjs.com/v3/smtp.js"></script>
+    <script>
+      function sendEmail(){
+        Email.send({
+          Host : "smtp.gmail.com",
+          Username : "brian.test10000@gmail.com",
+          Password : "brian.10000",
+          To : 'brian.test10000@gmail.com',
+          From : document.getElementById("email").value,
+          Subject : "Test",
+          Body : "Test"
+      }).then(
+        message => alert(message)
+      );
+
+      }
+    </script-->
 
 </body>
 </html>

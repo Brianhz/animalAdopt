@@ -97,10 +97,10 @@
 <p></p>
 
 <div>
-	<form action="/wanted" method="POST">
+	<form action="/wanted" method="post" enctype="multipart/form-data">
 		<input type="text" name="title" placeholder="title">
-		<input type="desciption" name="desciption" placeholder="desciption and contact">
-		<input type="file" name="pic">
+		<input type="description" name="description" placeholder="description and contact">
+		<input type="file" name="pic" autocomplete="off" required>
 		<input type="submit" value="Share">
 	</form>
 </div>
@@ -118,7 +118,7 @@
 			<h1>{{ wanted.title }}</h1>
 			<p>{{ wanted.pic }}</p>
 			<p>{{ wanted.user_id }} on {{ wanted.date_lostposted }}</p>
-			<p>{{ wanted.desciption }}</p>	
+			<p>{{ wanted.description }}</p>	
 		{% endfor %}
 	{% endif %}
 
