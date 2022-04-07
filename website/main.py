@@ -1,20 +1,26 @@
+from email.policy import default
 from fileinput import filename
 from unicodedata import decomposition
 import flask_login
 from requests_html import HTMLSession
-from datetime import datetime
+from datetime import datetime, date
 from flask import Flask, render_template, url_for, flash, redirect, request, session
 from flask_admin import Admin 
 from flask_admin.contrib.sqla import ModelView
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import login_required, current_user, LoginManager, login_user, UserMixin
+from flask_login import login_required, current_user, LoginManager, login_user, UserMixin, logout_user
 from forms import RegistrationForm, LoginForm, PostForm, LostForm
-from sqlalchemy import Column, String, Integer
-from sqlalchemy import insert
+from sqlalchemy import Column, String, Integer, Boolean
+from sqlalchemy import insert, update, delete
 from sqlalchemy import Table
 from werkzeug.utils import secure_filename
 import os
-import mimetypes
+import smtp
+from flask import make_response
+from io import BytesIO
+import base64
+import random
+import math
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ggg'
@@ -39,7 +45,7 @@ def load_user(user_id):
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    email = db.Column(db.String(220), unique=True, nullable=False)
     image_file = db.Column(db.String(20), nullable=False, default='default.jpg')
     password = db.Column(db.String(60), nullable=False)
     posts = db.relationship('Posts', backref='author',lazy=True)
@@ -59,7 +65,8 @@ class Payment(db.Model):
 
 
     def __repr__(self):
-        return f"Session('{self.username}', '{self.sid}')"
+        # return f"Session('{self.username}', '{self.sid}')"
+        return f"Payment('{self.username}', '{self.sid}')"
 
 class Posts(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -72,7 +79,7 @@ class Posts(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
-        return f"Post('{self.title}', '{self.date_posted}'):"
+        return f"Posts('{self.title}', '{self.date_posted}'):"
 
 class Lost(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -85,24 +92,46 @@ class Lost(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     def __repr__(self):
-        return f"Post('{self.title}', '{self.date_lostposted}'):"
+        return f"Lost('{self.title}', '{self.date_lostposted}'):"
 
 class Product(db.Model):
-    pid = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(20), nullable=False)
     price = db.Column(db.Integer, nullable=False)
     image = db.Column(db.String(100), nullable=False)
 
-    def __init__(self, pid, title, price, image):
-        self.pid = pid
-        self.title = title
-        self.price = price
-        self.image = image
+    def __repr__(self):
+        return f"Product('{self.title}','{self.price}','{self.image}'):"
+
+class Adopt(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    dob = db.Column(db.DateTime, nullable=False)
+    petType = db.Column(db.String, nullable=False)
+    ptt = db.Column(db.String, nullable=False)
+    title = db.Column(db.String(20), nullable=False)
+    description = db.Column(db.String(50), nullable=False)
+    price = db.Column(db.Integer, default=0)
+    image = db.Column(db.String(100), nullable=False)
+    adopted = db.Column(db.Boolean, default=False)
+
+    def __repr__(self):
+        return f"Adopt('{self.dob}','{self.petType}','{self.ptt}','{self.title}', '{self.description}', '{self.price}', '{self.image}'):"
+
+    # def __init__(self, id, title, description, price, image, adopted):
+    #     self.id = id
+    #     self.title = title
+    #     self.description = description
+    #     self.price = price
+    #     self.image = image
+    #     self.adopted = adopted
 
 class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer)
+    user_id = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.Text)
+
+    def __repr__(self):
+        return f"Comment('{self.user_id}','{self.comment}'):"
 
 class Orders(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -111,10 +140,14 @@ class Orders(db.Model):
     product_name = db.Column(db.String(20))
     quantity = db.Column(db.Integer)
     price = db.Column(db.Integer)
+    def __repr__(self):
+        return f"Order('{self.user_id}','{self.product_id}','{self.quantity}', '{self.price}'):"
 
 # Create tables 
 if not os.path.exists('site.db'):
     db.create_all()
+else:
+    app.run(debug=True)
 
 # Pre-input posts record in table Posts
 # posts = [
@@ -132,12 +165,57 @@ if not os.path.exists('site.db'):
 #         'date_posted': 'April 29, 2021'
 #     }
 # ]
-new_posts1 = Posts(user_id=1, email="asd@asd.com", title="Blog Post1", content="1st post content")
-db.session.add(new_posts1)
-db.session.commit()
-new_posts2 = Posts(user_id=2, email="asd2@asd.com", title="Good shop", content="it is a really good shop with different brands!")
-db.session.add(new_posts2)
-db.session.commit()
+
+# new_product1 = Product(title="dog1", price="55", image="dog1.jpg")
+# db.session.add(new_product1)
+# db.session.commit()
+# new_product2 = Product(title="dog2", price="66", image="dog2.jpg")
+# db.session.add(new_product2)
+# db.session.commit()
+# new_product3 = Product(title="dog2", price="77", image="dog3.jpg")
+# db.session.add(new_product3)
+# db.session.commit()
+# new_product4 = Product(title="dog4", price="44", image="dog4.jpg")
+# db.session.add(new_product4)
+# db.session.commit()
+# new_product5 = Product(title="dog5", price="66", image="dog5.jpg")
+# db.session.add(new_product5)
+# db.session.commit()
+# new_product6 = Product(title="dog6", price="51", image="dog6.jpg")
+# db.session.add(new_product6)
+# db.session.commit()
+
+# new_posts1 = Posts(user_id=1, email="asd@asd.com", title="Blog Post1", content="1st post content")
+# db.session.add(new_posts1)
+# db.session.commit()
+# new_posts2 = Posts(user_id=2, email="asd2@asd.com", title="Good shop", content="it is a really good shop with different brands!")
+# db.session.add(new_posts2)
+# db.session.commit()
+
+# db.session.query(Adopt).delete()
+# db.session.commit()
+
+# new_adopt1 = Adopt(dob = datetime.strptime("22/10/20", '%y/%m/%d'), ptt = "CT", petType = "dog", title="test1", description="test1", price=0, image="download-1.jpg")
+# db.session.add(new_adopt1)
+# db.session.commit()
+# new_adopt2 = Adopt(dob = datetime.strptime("22/10/10", '%y/%m/%d'), ptt = "KT", petType = "dog", title="test2", description="test2", price=0, image="download-2.jpg")
+# db.session.add(new_adopt2)
+# db.session.commit()
+# new_adopt3 = Adopt(dob = datetime.strptime("22/12/05", '%y/%m/%d'), ptt = "YMT", petType = "dog", title="test3", description="test3", price=0, image="download-3.jpg")
+# db.session.add(new_adopt3)
+# db.session.commit()
+# new_adopt4 = Adopt(dob = datetime.strptime("22/11/20", '%y/%m/%d'), ptt = "CT", petType = "dog", title="test4", description="test4", price=0, image="download-4.jpg")
+# db.session.add(new_adopt4)
+# db.session.commit()
+# new_adopt5 = Adopt(dob = datetime.strptime("22/12/10", '%y/%m/%d'), ptt = "KT", petType = "dog", title="test5", description="test5", price=0, image="download-5.jpg")
+# db.session.add(new_adopt5)
+# db.session.commit()
+# new_adopt6 = Adopt(dob = datetime.strptime("22/12/25", '%y/%m/%d'), ptt = "YMT", petType = "dog", title="test6", description="test6", price=0, image="download-6.jpg")
+# db.session.add(new_adopt6)
+# db.session.commit()
+
+
+
 
 # Define admin view of db
 admin.add_view(ModelView(User, db.session))
@@ -145,15 +223,56 @@ admin.add_view(ModelView(Posts, db.session))
 admin.add_view(ModelView(Lost, db.session))
 admin.add_view(ModelView(Product, db.session))
 admin.add_view(ModelView(Payment, db.session))
+admin.add_view(ModelView(Adopt, db.session))
 admin.add_view(ModelView(Comment, db.session))
 admin.add_view(ModelView(Orders, db.session))
 
 # Define route
 @app.route('/')
+def home():
+    return render_template("p.html")
+
 
 @app.route('/pay')
 def pay():
+    print("/pay ...")
     return render_template("cashier.html")
+
+@app.route('/adopt', methods=['GET', 'POST'] )
+def adopt():
+    if (request.method == "POST" or request.method == "GET"):
+        adoptlist = Adopt.query.filter_by(adopted = False)
+        return render_template("Adopt.html", adoptlist=adoptlist)
+    else:
+        return render_template("p.html")
+
+@app.route('/adopt_submit/<adoptitem_id>', methods=['GET', 'POST'] )
+def adopt_submit(adoptitem_id):
+    stmt = (
+     update(Adopt).
+     where(Adopt.id == adoptitem_id).
+     values(adopted = True)
+    )
+    db.session.execute(stmt)
+    db.session.commit()
+    adoptlist = Adopt.query.filter_by(adopted = False)
+    return render_template("Adopt.html", adoptlist=adoptlist)
+
+        # adopted = request.values.get("credit_No")
+        # if credit_No != None:
+        #     print(adopted)
+        #     credit = Payment(credit_No=credit_No)
+        #     db.session.add(credit)
+        #     db.session.commit()
+        #     carts = session["cart"]
+        #     user_id = session["user_id"]
+        #     if carts != None and user_id != None:
+        #         for x1 in carts:
+        #             ordersRec = Orders(user_id=user_id, product_id=x1["product"], product_name=x1["productTitle"], quantity=x1["quantity"], price=x1["unitPrice"])
+        #             db.session.add(ordersRec)
+        #             db.session.commit()
+        #     flash(f"Thank you for saving animals!!")
+        #     return render_template("Adopt.html")
 
 @app.route('/cashier', methods=['GET', 'POST'])
 def cashier():
@@ -172,7 +291,8 @@ def cashier():
                     db.session.add(ordersRec)
                     db.session.commit()
             flash(f"Thank you for your purchase!!")
-            return redirect(url_for('home'))
+            session.pop('cart', None)
+            return redirect(url_for('p'))
 
 @app.route('/search', methods=['GET', 'POST'])
 def search():
@@ -190,9 +310,13 @@ def search():
 
 @app.route('/logout')
 def logout():
+    print("logout...")
+    logout_user()
     # remove the username from the session if it's there
     session.pop('username', None)
-    return redirect(url_for('home'))
+    session.pop('cart', None)
+    flash('You were logged out')
+    return redirect(url_for('p'))
 
 @app.route('/addrec')
 def addrec():
@@ -217,10 +341,10 @@ def product():
 @app.route("/item/<int:id>")
 def display_item(id):
     # This page show one product. Customer can add it to cart
-    item = Product.query.filter_by(pid=id).first()
+    item = Product.query.filter_by(id=id).first()
 
     # <<< debug
-    print(item.pid)
+    print(item.id)
     print(item.title)
     print(item.price)
     print(item.image)
@@ -228,32 +352,36 @@ def display_item(id):
 
     return render_template("Item.html", display_item=item)
 
-@app.route('/add_to_cart/<int:id>',methods=["GET", "POST"])
-def add_to_cart(id):
+@app.route('/add_to_cart/<int:pid>',methods=["GET", "POST"])
+def add_to_cart(pid):
+    print("add_to_card")
     quantity = request.values.get("quantity")
     productTitle = request.values.get("productTitle")
     unitPrice = request.values.get("unitPrice")
-    print(id)
+    print(pid)
     print(quantity)
     print(productTitle)
     print(unitPrice)
     if "cart" not in session:
         session["cart"] = []
-    session["cart"].append({"product":id, "productTitle": productTitle, "quantity":quantity, "unitPrice": unitPrice})
+    session["cart"].append({"product":pid, "productTitle": productTitle, "quantity":quantity, "unitPrice": unitPrice})
+
     #print session[cart]
     flash("Successfully added to cart!")
-    return redirect("/cart")
+    print("Successfully added to cart!")
+    # return redirect("/cart")
+    return redirect(url_for("cart"))
 
 @app.route('/p')
 def p():
     # return render_template('p.html')
     return render_template('p.html')
 
-@app.route("/home")
-def home():
-    #return "Home Page"#
-    # return render_template('Home.html')
-    return render_template('p.html')
+# @app.route("/home")
+# def home():
+#     #return "Home Page"#
+#     # return render_template('Home.html')
+#     return render_template('p.html')
 
 @app.route("/about")
 def about():
@@ -290,6 +418,26 @@ def submitComment():
     else:
         return "GET comment"
 
+
+@app.route('/admin_Comment',methods=["GET", "POST"])
+def admin_Comment():
+    print('displaycomment')
+    commentlist = Comment.query.all()
+    for commentitem in commentlist:
+        print(commentitem)
+    flash("Successfully submit !")
+    return render_template("admin_Comment.html", commentlist=commentlist)
+
+@app.route('/admin_Order',methods=["GET", "POST"])
+def admin_Order():
+    print('displayorder')
+    orderlist = Orders.query.all()
+    for orderitem in orderlist:
+        print(orderitem)
+    flash("Successfully submit !")
+    return render_template("admin_Order.html", orderlist=orderlist)
+
+
 @app.route('/blog',methods=["GET", "POST"])
 def writeBlog():
     if request.method == "POST":
@@ -298,10 +446,10 @@ def writeBlog():
         title = request.values.get("title")
         content = request.values.get("content")
         user_id = session['user_id']
-        blogRec = Post(user_id=user_id, title=title, content=content, email=email)
+        blogRec = Posts(user_id=user_id, title=title, content=content, email=email)
         db.session.add(blogRec)
         db.session.commit()
-        blogs = Post.query.all()
+        blogs = Posts.query.all()
         form=PostForm()
         return render_template("About.html", blogs=blogs, form=form)
        else:
@@ -344,22 +492,25 @@ def account():
 
             ### Store user to current_user
             login_user(userRec)
+            flash("Login Success!!" + username)
 
-            # return redirect(url_for('home'))
+            return redirect(url_for('p'))
         else:
             print("record not found")
             flash("Invalid username/password: " + username + "/" + password)
             error = "Username / Passord: " + username + "/" + password + " not found!!"
 
     if 'username' in session:
-        # session.pop('username', None)
-        # return render_template('p.html', posts=posts)
-        if session['username'] is None:
-            return render_template('Account.html')
-        else: 
-            return render_template('p.html')
+        session.pop('username', None)
+        return render_template('p.html')
     else:
         return render_template('Account.html')
+    #     if session['username'] is None:
+    #         return render_template('p.html')
+    #     else: 
+    #         return render_template('Account.html')
+    # else:
+    #     return render_template('Account.html')
 
 @app.route('/register',methods=["GET", "POST"])
 def register():
@@ -374,30 +525,75 @@ def register():
         print(confirm_password)
         print(email)
         
-        name = User.query.filter_by(username=username).first()
-        user_email =  User.query.filter_by(email=email).first()
+        user_Rec = User.query.filter_by(username=username).first()
+        userEmail_Rec =  User.query.filter_by(email=email).first()
         
-        if name == None:
-            if user_email == None:
+        print(user_Rec)
+        if user_Rec == None:
+            if userEmail_Rec == None:
                 if password == confirm_password:
                     new_user = User(username=username, password=confirm_password, email=email)
                     print(new_user)
                     db.session.add(new_user)
                     db.session.commit()
+                    subject = 'Register'
+                    body = 'Thank you for registration'
+                    smtp.sendR(email, subject, body)
+                    print("email is sent to: " + email)
                     flash(f"user created {username} !!")
                     return redirect(url_for('account'))
                 else:
+                    print("password is different")
                     flash('wrong password')
             else:
+                print("email is already exist: " + email)
                 flash(" this email  has been taken ")
                 return redirect(url_for('register'))
         else:
+            print("name is already exist: " + username)
             flash(" this username has been taken ")
             return redirect(url_for('register'))
 
                 
     
     return render_template("Register.html")
+
+@app.route('/forget',methods=["GET", "POST"])
+def forget():
+    return render_template("Forget.html")
+
+@app.route('/resetPassword',methods=["GET", "POST"])
+def resetPassword():
+    email = request.values.get("email")
+    username = request.values.get("username")
+    user_Rec = User.query.filter_by(email = email, username= username).first()
+
+    if user_Rec != None:
+        r1 = math.floor(random.uniform(0, 9))
+        r2 = math.floor(random.uniform(0, 9))
+        r3 = math.floor(random.uniform(0, 9))
+        r4 = math.floor(random.uniform(0, 9))
+        r5 = math.floor(random.uniform(0, 9))
+        r6 = math.floor(random.uniform(0, 9))
+        password = str(r1)+str(r2)+str(r3)+str(r4)+str(r5)+str(r6)
+        print(username, password, email)
+        stmt = (
+        update(User).
+        where(User.username == username).
+        values(password=password)
+        )
+        db.session.execute(stmt)
+        db.session.commit()
+        subject = 'Reset password'
+        body = 'Your new password is '+ password
+        smtp.sendR(email, subject, body)
+        print("email is sent to: " + email)
+        flash(f"password is sent {username} !!")
+        return redirect(url_for('account'))
+    else:
+        flash(f"invalid username or email !!")
+        return redirect(url_for('account'))
+
 
 @app.route("/admin1")
 @login_required
@@ -416,17 +612,38 @@ def admin1():
 
 @app.route("/cart")
 def cart():
-    if 'user_id' in session:
-        userId = session['user_id']
-    else:
-          flash("Please login")
-          return redirect(url_for('account'))
-    return render_template("Cart.html")
-    #return render_template('Cart.html')
+    # if 'user_name' in session:
+    #     userName = session['user_name']
+    # else:
+    print("/cart ...")
+    if "username" not in session:
+        flash("Please login")
+        return redirect(url_for('account'))
+    cartlist=[]
+    totalPrice = 0
+    quantity = 0
+    unitPrice = 0
+    if "cart" in session:
+        for productitem in session["cart"]:
+            cartitem = []
+            for key, value in productitem.items():
+                cartitem.append(value)
+                if key == "quantity":
+                    quantity = int(value)
+                if key == "unitPrice":
+                    unitPrice = int(value)
+            subtotal = quantity * unitPrice
+            totalPrice = totalPrice + subtotal
+            cartitem.append(subtotal)
+            cartlist.append(cartitem)
+        return render_template("Cart.html", cartlist=cartlist, totalPrice=totalPrice)
+        #return render_template('Cart.html')
+    flash(f"Nothing in cart!!")
+    return render_template("p.html")
 
 @app.route("/wanted",methods=["GET", "POST"])
 def wanted():
-    if request.method == "POST":
+    if (request.method == "POST" or request.method == "GET"):
         
         print(request.files)
 
@@ -434,21 +651,36 @@ def wanted():
             title = request.values.get("title")
             description = request.values.get("description")
             user_id = session['user_id']
-            pic = request.files['pic']
 
-            if not pic:
-                return "No pic uploaded", 400
+            if request.files:
+                pic = request.files['pic']
+                if pic:
+                    filename = secure_filename(pic.filename)
+                    mimetype = pic.mimetype
+                    lostRec = Lost(user_id=user_id, title=title, description=description, filename=filename, img=pic.read(), mimetype=mimetype)
 
-            filename = secure_filename(pic.filename)
-            mimetype = pic.mimetype
+                    db.session.add(lostRec)
+                    db.session.commit()
 
-            lostRec = Lost(user_id=user_id, title=title, description=description, filename=filename, img=pic.read(), mimetype=mimetype)
-
-            db.session.add(lostRec)
-            db.session.commit()
             losts = Lost.query.all()
+            lostlist = []
+            for lostitem in losts:
+                lostArray = []
+                lostArray.append(lostitem.user_id)
+                lostArray.append(lostitem.title)
+                lostArray.append(lostitem.description)
+                lostArray.append(lostitem.filename)
+                data=BytesIO(lostitem.img)
+                encode_img=base64.b64encode(data.getvalue())
+                decode_img=encode_img.decode("UTF-8")
+                lostArray.append(decode_img)
+                lostArray.append(lostitem.mimetype)                
+                lostlist.append(lostArray)
+                print(lostitem.user_id)
+            
+
             form=LostForm()
-            return render_template("Wanted.html", form=form, losts=losts)
+            return render_template("Wanted.html", form=form, losts=losts, lostlist=lostlist)
         else:
             return redirect(url_for('account'))
     else:

@@ -20,7 +20,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
     <!--<link rel="stylesheet" filename='css/style.css'>-->
     <!--<script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script> -->
-    <title>{%block title %}Register{%endblock%}
+    <title>{%block title %}Forget{%endblock%}
     </title> 
 
     <!-- Bootstrap core CSS -->
@@ -104,22 +104,15 @@
 </nav>
 
     <div class="registerbox">
-    <h1>Register</h1>
+    <h1>Forget</h1>
 
 
-    <form method ="POST">
-        {% if error %}
-        <p class=error><strong>Error:</strong> {{ error }}
-        {% endif %}
-        <p>Username</p>
-        <input type="text" name="username" placeholder="Enter Username" value="">
-        <p>Password</p>
-        <input  type="password" name="password" placeholder="Enter Password" value="">
-        <p>Confirm Password</p>
-        <input  type="password" name="confirm_password" placeholder="Enter Password" value="">
+    <form method ="POST" action="/resetPassword">
         <p>Email</p>
         <input type="email" name="email" placeholder="Enter Email" value="">
-        <button type="submit">Register</button>
+        <p>Username/p>
+        <input type="text" name="username" placeholder="Enter Username" value="">
+        <button type="submit">Change</button>
     </form>
 
 
@@ -128,25 +121,6 @@
         <a href="https://www.youtube.com/watch?v=z6yprwC16_M" class="Youtube">Youtube<i class="fab fa-youtube"></i></a>
     </div>
 
-
-    <!--form onsubmit="sendEmail(); reset(); return false;"-->
-    <!--script src="http://smtpjs.com/v3/smtp.js"></script>
-    <script>
-      function sendEmail(){
-        Email.send({
-          Host : "smtp.gmail.com",
-          Username : "brian.test10000@gmail.com",
-          Password : "brian.10000",
-          To : 'brian.test10000@gmail.com',
-          From : document.getElementById("email").value,
-          Subject : "Test",
-          Body : "Test"
-      }).then(
-        message => alert(message)
-      );
-
-      }
-    </script-->
     {%endblock%}
 </body>
 </html>

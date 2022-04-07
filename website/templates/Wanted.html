@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css')}}">
     <!--<link rel="stylesheet" filename='css/style.css'>-->
     <!--<script type="text/javascript" src="{{ url_for('static', filename='index.js') }}"></script> -->
-    <title>{%block title %}About{%endblock%}
+    <title>{%block title %}Wanted{%endblock%}
     </title> 
 
     <!-- Bootstrap core CSS -->
@@ -63,11 +63,21 @@
 				  <a class="nav-link" aria-current="page" href="{{ url_for('about')}}">About</a>
 				</li>
 				<li class="nav-item">
+				  <a class="nav-link" aria-current="page" href="{{ url_for('wanted')}}">Lost</a>
+				</li>
+				<li class="nav-item">
 				  <a class="nav-link" aria-current="page" href="{{ url_for('product')}}">Product</a>
 				</li>
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="{{ url_for('adopt')}}">Adopt</a>
+                </li>
+				{% if current_user.is_authenticated %}
+				<li class="nav-item">
+				  <a class="nav-link" aria-current="page" href="{{ url_for('admin1')}}">Admin</a>
+				{% endif %}
 				{% if session["username"] %}
 				<li class="nav-item">
-				  <a class="nav-link" aria-current="page" href="{{ url_for('account')}}">Logout</a>
+				  <a class="nav-link" aria-current="page" href="{{ url_for('logout')}}">Logout</a>
 				</li>
 				{% else %}
 				<li class="nav-item">
@@ -80,49 +90,47 @@
 			  </ul>
 	  
 			  <div class="clear"></div>
+			</div>
 	  
+			  <div class=thank>
+			  {% extends "layout.html" %}
 			  </div>
+			  {% block body %}
 			  
 		  </div>
 		</nav>
 	  </header>
-
-<div class=thank>
-{% extends "layout.html" %}
-</div>
-{% block body %}
+	  
 <div class="comment2">
-<h1>Please Share the pet you lost!!!</h1>
-<h2>Let us help!!!</h2>
-<p></p>
+	<h1>Please Share the pet you lost!!!</h1>
+	<h2>Let us help!!!</h2>
+	<p></p>
 
-<div>
-	<form action="/wanted" method="post" enctype="multipart/form-data">
-		<input type="text" name="title" placeholder="title">
-		<input type="description" name="description" placeholder="description and contact">
-		<input type="file" name="pic" autocomplete="off" required>
-		<input type="submit" value="Share">
-	</form>
-</div>
+	<div>
+		<form action="/wanted" method="post" enctype="multipart/form-data">
+			<input type="text" name="title" placeholder="title">
+			<input type="description" name="description" placeholder="description and contact">
+			<input type="file" name="pic" autocomplete="off" required>
+			<input type="submit" value="Share">
+		</form>
+	</div>
 
 
-<div class="wanted">
-	{% for lost in losts %}
-	<h1>{{ lost.title }}</h1>
-	<p>{{ lost.pic }}</p>
-	<p>By {{ lost.author }} on {{ lost.date_lostposted }}</p>
-	<p>{{ lost.description }}</p>
-	{% endfor %}
-	{% if lost is not none %}
-		{% for wanted in lost %}
-			<h1>{{ wanted.title }}</h1>
-			<p>{{ wanted.pic }}</p>
-			<p>{{ wanted.user_id }} on {{ wanted.date_lostposted }}</p>
-			<p>{{ wanted.description }}</p>	
-		{% endfor %}
-	{% endif %}
+	<div class="wanted">
 
-</div>
+		{% if lostlist is not none %}
+			{% for wanted in lostlist %}
+				<h1>{{ wanted[1] }}</h1>
+				<p>{{ wanted[2] }}</p>
+				<p>{{ wanted[3] }}</p>
+				<p><img src="data:image/jpeg;base64,{{wanted[4]}}" width="200" height="200"></p>
+				<p>{{ wanted[5] }}</p>
+				<p>{{ wanted[6] }}</p>
+				
+			{% endfor %}
+		{% endif %}
+
+	</div>
 </div>
 <div class="icon2">
 <a href="https://www.youtube.com/watch?v=z6yprwC16_M" class="Youtube">Youtube<i class="fab fa-youtube"></i></a>

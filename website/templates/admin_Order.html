@@ -99,39 +99,33 @@
       <br>
       <br>
       <br>
-      <br>
-
-      <div class="admin"> 
-        <a class="nav-link1" aria-current="page" href="{{ url_for('admin_Comment')}}">Opinion</a>
-        <br>
-        <br>
-        <br>
-        <br>
-
-        <a class="nav-link2" aria-current="page" href="{{ url_for('admin_Order')}}">Order</a>
-      </div>
 
 
-      <!-- <div class=cart>
+        <div class=cart>
       
         <table>
         <tr>
           <th>Userid</th>
-          <th>Comment</th>
+          <th>Productid</th>
+          <th>Productname</th>
+          <th>Quantity</th>
+          <th>Price</th>
         </tr>
-        {% for postItem in session['comment'] %}
+        {% for orderItem in orderlist %}
         <tr>
-          <th>{{postItem.user_id}}</th>
-          <th>{{postItem.comment}}</th>
+          <th>{{orderItem.user_id}}</th>
+          <th>{{orderItem.product_id}}</th>
+          <th>{{orderItem.product_name}}</th>
+          <th>{{orderItem.quantity}}</th>
+          <th>{{orderItem.price}}</th>
         </tr>
         {% endfor %}
-
-      
       
         
-        </table> 
-      </div>-->
-        {%endblock%}
+        </table>
+        </div>
 
-  </body>
-  </html> 
+      {%endblock%}
+
+    </body>
+    </html> 

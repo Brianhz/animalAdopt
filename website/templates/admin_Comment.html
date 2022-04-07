@@ -61,9 +61,9 @@
           <li class="nav-item">
             <a class="nav-link" aria-current="page" href="{{ url_for('product')}}">Product</a>
           </li>
-                  <li class="nav-item">
-                      <a class="nav-link" aria-current="page" href="{{ url_for('adopt')}}">Adopt</a>
-                  </li>
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="{{ url_for('adopt')}}">Adopt</a>
+          </li>
           {% if current_user.is_authenticated %}
           <li class="nav-item">
             <a class="nav-link" aria-current="page" href="{{ url_for('admin1')}}">Admin</a>
@@ -90,7 +90,7 @@
           </div>
           {% block body %}
           
-        </div>
+          </div>
       </nav>
       </header>
 
@@ -99,39 +99,28 @@
       <br>
       <br>
       <br>
-      <br>
-
-      <div class="admin"> 
-        <a class="nav-link1" aria-current="page" href="{{ url_for('admin_Comment')}}">Opinion</a>
-        <br>
-        <br>
-        <br>
-        <br>
-
-        <a class="nav-link2" aria-current="page" href="{{ url_for('admin_Order')}}">Order</a>
-      </div>
 
 
-      <!-- <div class=cart>
+        <div class=cart>
       
         <table>
         <tr>
           <th>Userid</th>
           <th>Comment</th>
         </tr>
-        {% for postItem in session['comment'] %}
+        {% for commentItem in commentlist %}
         <tr>
-          <th>{{postItem.user_id}}</th>
-          <th>{{postItem.comment}}</th>
+          <th>{{commentItem.user_id}}</th>
+          <th>{{commentItem.comment}}</th>
         </tr>
         {% endfor %}
-
-      
       
         
-        </table> 
-      </div>-->
-        {%endblock%}
+        </table>
+        </div>
 
-  </body>
-  </html> 
+
+      {%endblock%}
+
+    </body>
+    </html> 

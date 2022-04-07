@@ -38,7 +38,7 @@
 	{% if title %}
 		<title>Flash Blog - {{ title }}</title>
 	{% else %}
-		<title>Product</title>
+		<title>Account</title>
 	{% endif %}
 
 </head>
@@ -46,52 +46,61 @@
 <body>
 <div class="pic">
 
-	<header>
+    <header>
 		<nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
 		  <div class="container-fluid">
-			<img class="navbar-brand" src="{{ url_for('static', filename='css/Unknown-2.jpg')}}">
-			<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-			  <span class="navbar-toggler-icon"></span>
-			</button>
-			<div class="collapse navbar-collapse" id="navbarCollapse">
-			  <ul class="navbar-nav me-auto mb-2 mb-md-0">
-				<li class="nav-item">
-				  <a class="nav-link" aria-current="page" href="{{ url_for('p')}}">Home</a>
-				</li>
-				<li class="nav-item">
-				  <a class="nav-link" aria-current="page" href="{{ url_for('about')}}">About</a>
-				</li>
-				<li class="nav-item">
-				  <a class="nav-link" aria-current="page" href="{{ url_for('product')}}">Product</a>
-				</li>
-				{% if session["username"] %}
-				<li class="nav-item">
-				  <a class="nav-link" aria-current="page" href="{{ url_for('account')}}">Logout</a>
-				</li>
-				{% else %}
-				<li class="nav-item">
-				  <a class="nav-link" aria-current="page" href="{{ url_for('account')}}">Login</a>
-				</li>
-				{% endif %}	
-				<li class="nav-item">
-				  <a class="nav-link" aria-current="page" href="{{ url_for('cart')}}">Cart</a>
-				</li>
-			  </ul>
-	  
-			  <div class="clear"></div>
-
-	  
-			  </div>
-			  
+		  <img class="navbar-brand" src="{{ url_for('static', filename='css/Unknown-2.jpg')}}">
+		  <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+			<span class="navbar-toggler-icon"></span>
+		  </button>
+		  <div class="collapse navbar-collapse" id="navbarCollapse">
+			<ul class="navbar-nav me-auto mb-2 mb-md-0">
+			<li class="nav-item">
+			  <a class="nav-link" aria-current="page" href="{{ url_for('p')}}">Home</a>
+			</li>
+			<li class="nav-item">
+			  <a class="nav-link" aria-current="page" href="{{ url_for('about')}}">About</a>
+			</li>
+			<li class="nav-item">
+			  <a class="nav-link" aria-current="page" href="{{ url_for('wanted')}}">Lost</a>
+			</li>
+			<li class="nav-item">
+			  <a class="nav-link" aria-current="page" href="{{ url_for('product')}}">Product</a>
+			</li>
+					<li class="nav-item">
+						<a class="nav-link" aria-current="page" href="{{ url_for('adopt')}}">Adopt</a>
+					</li>
+			{% if current_user.is_authenticated %}
+			<li class="nav-item">
+			  <a class="nav-link" aria-current="page" href="{{ url_for('admin1')}}">Admin</a>
+			{% endif %}
+			{% if session["username"] %}
+			<li class="nav-item">
+			  <a class="nav-link" aria-current="page" href="{{ url_for('logout')}}">Logout</a>
+			</li>
+			{% else %}
+			<li class="nav-item">
+			  <a class="nav-link" aria-current="page" href="{{ url_for('account')}}">Login</a>
+			</li>
+			{% endif %}	
+			<li class="nav-item">
+			  <a class="nav-link" aria-current="page" href="{{ url_for('cart')}}">Cart</a>
+			</li>
+			</ul>
+		
+			<div class="clear"></div>
+		  </div>
+		
+			
 		  </div>
 		</nav>
-	  </header>
+		</header>
 
 	<div class="icon"></div>
     
 
-</br>
-</br>
+<br>
+<br>
 
 <div class="loginbox">
     {% extends "layout.html" %}
@@ -106,7 +115,9 @@
             <p>Password</p>
             <input type="password" name="password" id="password" placeholder="Enter Password">
             <input type="submit" value="Login"><br>
-            <a href="{{ url_for('register')}}">Do not have an account?</a>
+            <a href="{{ url_for('register')}}">Do not have an account?</a><br>
+			<a href="{{ url_for('forget')}}">Forget Password?</a>
+        </form>
         </form>
     {% endblock %}
     </div>
@@ -114,6 +125,8 @@
     <div class="icon2">
         <a href="https://www.youtube.com/watch?v=z6yprwC16_M" class="Youtube">Youtube<i class="fab fa-youtube"></i></a>
     </div>
+
+
     
 	
 

@@ -63,14 +63,21 @@
 				  <a class="nav-link" aria-current="page" href="{{ url_for('about')}}">About</a>
 				</li>
 				<li class="nav-item">
-				  <a class="nav-link" aria-current="page" href="{{ url_for('product')}}">Product</a>
+				  <a class="nav-link" aria-current="page" href="{{ url_for('wanted')}}">Lost</a>
 				</li>
 				<li class="nav-item">
-					<a class="nav-link" aria-current="page" href="{{ url_for('wanted')}}">Lost</a>
-				  </li>
+				  <a class="nav-link" aria-current="page" href="{{ url_for('product')}}">Product</a>
+				</li>
+                <li class="nav-item">
+                    <a class="nav-link" aria-current="page" href="{{ url_for('adopt')}}">Adopt</a>
+                </li>
+				{% if current_user.is_authenticated %}
+				<li class="nav-item">
+				  <a class="nav-link" aria-current="page" href="{{ url_for('admin1')}}">Admin</a>
+				{% endif %}
 				{% if session["username"] %}
 				<li class="nav-item">
-				  <a class="nav-link" aria-current="page" href="{{ url_for('account')}}">Logout</a>
+				  <a class="nav-link" aria-current="page" href="{{ url_for('logout')}}">Logout</a>
 				</li>
 				{% else %}
 				<li class="nav-item">
@@ -83,17 +90,17 @@
 			  </ul>
 	  
 			  <div class="clear"></div>
+			</div>
 	  
+			  <div class=thank>
+			  {% extends "layout.html" %}
 			  </div>
+			  {% block body %}
 			  
 		  </div>
 		</nav>
 	  </header>
 
-<div class=thank>
-{% extends "layout.html"%}
-</div>
-{% block body %}
 <div class="comment">
 	<h1>Shop Name: A.Pet<br>
 		Phone: 68675654<br>
