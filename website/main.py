@@ -249,30 +249,29 @@ def adopt():
 @app.route('/adopt_submit/<adoptitem_id>', methods=['GET', 'POST'] )
 def adopt_submit(adoptitem_id):
     stmt = (
-     update(Adopt).
-     where(Adopt.id == adoptitem_id).
-     values(adopted = True)
+    update(Adopt).
+    where(Adopt.id == adoptitem_id).
+    values(adopted = True)
     )
     db.session.execute(stmt)
     db.session.commit()
+
+    if "username" in session:
+        username = session['username']
+        userRec = User.query.filter_by(username=username).first()
+        user_id = userRec.id
+        product_id = adoptitem_id
+        adoptRec = Adopt.query.filter_by(id=adoptitem_id).first()
+        if adoptRec != None:
+            product_name = adoptRec.title
+            ordersRec = Orders(user_id=user_id, product_id=product_id, product_name=product_name, quantity=1, price=0)
+            db.session.add(ordersRec)
+            db.session.commit()
+
     adoptlist = Adopt.query.filter_by(adopted = False)
     return render_template("Adopt.html", adoptlist=adoptlist)
 
-        # adopted = request.values.get("credit_No")
-        # if credit_No != None:
-        #     print(adopted)
-        #     credit = Payment(credit_No=credit_No)
-        #     db.session.add(credit)
-        #     db.session.commit()
-        #     carts = session["cart"]
-        #     user_id = session["user_id"]
-        #     if carts != None and user_id != None:
-        #         for x1 in carts:
-        #             ordersRec = Orders(user_id=user_id, product_id=x1["product"], product_name=x1["productTitle"], quantity=x1["quantity"], price=x1["unitPrice"])
-        #             db.session.add(ordersRec)
-        #             db.session.commit()
-        #     flash(f"Thank you for saving animals!!")
-        #     return render_template("Adopt.html")
+
 
 @app.route('/cashier', methods=['GET', 'POST'])
 def cashier():
