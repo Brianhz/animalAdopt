@@ -72,6 +72,10 @@
 				<li class="nav-item">
 				  <a class="nav-link" aria-current="page" href="{{ url_for('admin1')}}">Admin</a>
 				{% endif %}
+				{% if current_user.is_authenticated %}
+				<li class="nav-item">
+				  <a class="nav-link" aria-current="page" href="{{ url_for('customer')}}">Customer</a>
+				{% endif %}
 				{% if session["username"] %}
 				<li class="nav-item">
 				  <a class="nav-link" aria-current="page" href="{{ url_for('logout')}}">Logout</a>
@@ -104,6 +108,9 @@
 		<div class="search-input">
 			<form action="/search" method=post>
 				<input type=text name="search" value="{{request.form.search}}" placeholder="Type to search">
+				<br>
+				<input type=reset value="Return old value">
+				<br>
 				<input type=submit value="Search">
 			<i class="fas fa-search"></i>
 			</form>

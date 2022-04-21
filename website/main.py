@@ -12,8 +12,9 @@ from flask_login import login_required, current_user, LoginManager, login_user, 
 from forms import RegistrationForm, LoginForm, PostForm, LostForm
 from sqlalchemy import Column, String, Integer, Boolean
 from sqlalchemy import insert, update, delete
-from sqlalchemy import Table
+from sqlalchemy import Table, literal_column
 from werkzeug.utils import secure_filename
+from django.shortcuts import get_object_or_404
 import os
 import smtp
 from flask import make_response
@@ -21,6 +22,7 @@ from io import BytesIO
 import base64
 import random
 import math
+
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'ggg'
@@ -129,6 +131,7 @@ class Comment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, nullable=False)
     comment = db.Column(db.Text)
+    date_comment = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     def __repr__(self):
         return f"Comment('{self.user_id}','{self.comment}'):"
@@ -140,6 +143,7 @@ class Orders(db.Model):
     product_name = db.Column(db.String(20))
     quantity = db.Column(db.Integer)
     price = db.Column(db.Integer)
+    date_order = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     def __repr__(self):
         return f"Order('{self.user_id}','{self.product_id}','{self.quantity}', '{self.price}'):"
 
@@ -246,6 +250,31 @@ def adopt():
     else:
         return render_template("p.html")
 
+# @app.route('/adopt_submit/<adoptitem_id>', methods=['GET', 'POST'] )
+# def adopt_submit(adoptitem_id):
+#     stmt = (
+#     update(Adopt).
+#     where(Adopt.id == adoptitem_id).
+#     values(adopted = True)
+#     )
+#     db.session.execute(stmt)
+#     db.session.commit()
+
+#     if "username" in session:
+#         username = session['username']
+#         userRec = User.query.filter_by(username=username).first()
+#         user_id = userRec.id
+#         product_id = adoptitem_id
+#         adoptRec = Adopt.query.filter_by(id=adoptitem_id).first()
+#         if adoptRec != None:
+#             product_name = adoptRec.title
+#             ordersRec = Orders(user_id=user_id, product_id=product_id, product_name=product_name, quantity=1, price=0)
+#             db.session.add(ordersRec)
+#             db.session.commit()
+
+#     adoptlist = Adopt.query.filter_by(adopted = False)
+#     return render_template("Adopt.html", adoptlist=adoptlist)
+
 @app.route('/adopt_submit/<adoptitem_id>', methods=['GET', 'POST'] )
 def adopt_submit(adoptitem_id):
     stmt = (
@@ -257,19 +286,47 @@ def adopt_submit(adoptitem_id):
     db.session.commit()
 
     if "username" in session:
+        print("adopt_submit")
         username = session['username']
         userRec = User.query.filter_by(username=username).first()
         user_id = userRec.id
         product_id = adoptitem_id
-        adoptRec = Adopt.query.filter_by(id=adoptitem_id).first()
-        if adoptRec != None:
-            product_name = adoptRec.title
-            ordersRec = Orders(user_id=user_id, product_id=product_id, product_name=product_name, quantity=1, price=0)
-            db.session.add(ordersRec)
-            db.session.commit()
+        adoptRec = Adopt.query.filter_by(id=adoptitem_id).first()           
+        product_name = adoptRec.title
+        if "cart" not in session:
+            session["cart"] = []        
+        cartLen = len(session['cart'])
+        cartLenStr = "id" + str(cartLen) + "id-adopt"
+        cartList = session["cart"]
+        cartList.append({"product":adoptitem_id, "productTitle": product_name, "quantity": 1, "unitPrice": 0, "id":cartLenStr})
+        session["cart"] = cartList
+        # session["cart"].append({"product":adoptitem_id, "productTitle": product_name, "quantity": 1, "unitPrice": 0, "id":cartLenStr})
+
 
     adoptlist = Adopt.query.filter_by(adopted = False)
     return render_template("Adopt.html", adoptlist=adoptlist)
+
+# @app.route('/add_to_cart/<int:pid>',methods=["GET", "POST"])
+# def add_to_cart(pid):
+#     print("add_to_cart")
+#     quantity = request.values.get("quantity")
+#     productTitle = request.values.get("productTitle")
+#     unitPrice = request.values.get("unitPrice")
+#     print(pid)
+#     print(quantity)
+#     print(productTitle)
+#     print(unitPrice)
+#     if "cart" not in session:
+#         session["cart"] = []
+#     cartLen = len(session['cart'])
+#     cartLenStr = "id" + str(cartLen) + "id"
+#     session["cart"].append({"product":pid, "productTitle": productTitle, "quantity":quantity, "unitPrice": unitPrice, "id":cartLenStr})
+
+#     #print session[cart]
+#     flash("Successfully added to cart!")
+#     print("Successfully added to cart!")
+#     # return redirect("/cart")
+#     return redirect(url_for("cart"))
 
 
 
@@ -299,13 +356,51 @@ def search():
         product = request.values.get("search")
         print(product)
         #productList = Product.query.filter_by(title=product)
-        productList = Product.query.filter(Product.title.like("%{}%".format(product)))
+        productList = Product.query.filter(Product.title.like("%{}%".format(product)) | Product.price.like("%{}%".format(product)))
         if productList == None:
             print("cannot find the required product")
             flash("cannot find the required product")
         return render_template("Product.html", productList=productList )
 
-    return render_template('product.html')
+    return render_template('product.html')\
+
+# @app.route('/search_comment', methods=['GET', 'POST'])
+# def search_comment():
+#     if request.method == "POST":
+#         comment = request.values.get("search_comment")
+#         print("abc")
+#         print(comment)
+#         #commentList = Comment.query.filter_by(user_id=user_id)
+#         commentList = Comment.query.filter(Comment.user_id.like("%{}%".format(comment)))
+#         if commentList == None:
+#             print("cannot find the required user_id")
+#             flash("cannot find the required user_id")
+#         else:
+#             print("bbc")
+#             for comment1 in commentList:
+#                 print(comment1)           
+#         return render_template("admin_Comment.html", commentList=commentList )
+#     else:
+#         return render_template('admin_Comment.html')
+
+# @app.route('/search_order', methods=['GET', 'POST'])
+# def search_order():
+#     if request.method == "POST":
+#         order = request.values.get("search_order")
+#         print("abc")
+#         print(order)
+#         #commentList = Comment.query.filter_by(user_id=user_id)
+#         orderList = Orders.query.filter(Orders.user_id.like("%{}%".format(order)))
+#         if orderList == None:
+#             print("cannot find the required user_id")
+#             flash("cannot find the required user_id")
+#         else:
+#             print("bbc")
+#             for order1 in orderList:
+#                 print(order1)           
+#         return render_template("admin_Order.html", orderList=orderList )
+#     else:
+#         return render_template("admin_Order.html")
 
 @app.route('/logout')
 def logout():
@@ -363,7 +458,9 @@ def add_to_cart(pid):
     print(unitPrice)
     if "cart" not in session:
         session["cart"] = []
-    session["cart"].append({"product":pid, "productTitle": productTitle, "quantity":quantity, "unitPrice": unitPrice})
+    cartLen = len(session['cart'])
+    cartLenStr = "id" + str(cartLen) + "id-animal"
+    session["cart"].append({"product":pid, "productTitle": productTitle, "quantity":quantity, "unitPrice": unitPrice, "id":cartLenStr})
 
     #print session[cart]
     flash("Successfully added to cart!")
@@ -417,24 +514,151 @@ def submitComment():
     else:
         return "GET comment"
 
+@app.route("/admin1")
+@login_required
+def admin1():
+    id = current_user.id
+    if id is None:
+        print("id is None")
+    else:
+        print("id: " + str(id))
+    if id == 1:
+         return render_template("admin.html")
+    else:
+        # return render_template("customer.html")
+        print("Sorry you must be Admin")
+        flash("Sorry you must be Admin")
+        return render_template("p.html")
 
 @app.route('/admin_Comment',methods=["GET", "POST"])
 def admin_Comment():
     print('displaycomment')
-    commentlist = Comment.query.all()
-    for commentitem in commentlist:
-        print(commentitem)
-    flash("Successfully submit !")
-    return render_template("admin_Comment.html", commentlist=commentlist)
+    comment = request.values.get("admin_Comment")
+    if comment == None:
+        commentList = Comment.query.all()
+    else:
+        commentList = Comment.query.filter(Comment.user_id.like("%{}%".format(comment)) | Comment.comment.like("%{}%".format(comment)) | Comment.date_comment.like("%{}%".format(comment)))        
+    return render_template("admin_Comment.html", commentList=commentList )
+
 
 @app.route('/admin_Order',methods=["GET", "POST"])
 def admin_Order():
     print('displayorder')
-    orderlist = Orders.query.all()
-    for orderitem in orderlist:
-        print(orderitem)
-    flash("Successfully submit !")
-    return render_template("admin_Order.html", orderlist=orderlist)
+    order = request.values.get("admin_Order")
+    # order2 = request.values.get("admin_Order")
+    if order == None:
+        orderList = Orders.query.all()
+    else:
+        orderList = Orders.query.filter(Orders.user_id.like("%{}%".format(order)) | Orders.product_id.like("%{}%".format(order))| Orders.product_name.like("%{}%".format(order))| Orders.quantity.like("%{}%".format(order))| Orders.price.like("%{}%".format(order))| Orders.date_order.like("%{}%".format(order)))        
+    return render_template("admin_Order.html", orderList=orderList )
+
+@app.route("/index")
+def index():
+    print('displayorder2')
+    order = request.values.get("admin_Order")
+    # order2 = request.values.get("admin_Order")
+    if order == None:
+        orderList = Orders.query.all()
+    else:
+        orderList = Orders.query.filter(Orders.user_id.like("%{}%".format(order)) | Orders.product_id.like("%{}%".format(order))| Orders.product_name.like("%{}%".format(order))| Orders.quantity.like("%{}%".format(order))| Orders.price.like("%{}%".format(order))| Orders.date_order.like("%{}%".format(order))) 
+    return render_template("index.html", orderList=orderList)
+
+@app.route('/deleteOrder/<int:id>',methods=["GET", "POST"])
+def deleteOrder(id):
+    print('displayorder')
+    order = Orders.query.get_or_404(id)
+    print('1')
+    db.session.delete(order)
+    db.session.commit()
+    return redirect(url_for('admin_Order'))
+
+@app.route('/deleteOpinion/<int:id>',methods=["GET", "POST"])
+def deleteOpinion(id):
+    print('displayorder')
+    comment = Comment.query.get_or_404(id)
+    print('1')
+    db.session.delete(comment)
+    db.session.commit()
+    return redirect(url_for('admin_Comment'))
+
+@app.route('/customerdeleteOrder/<int:id>',methods=["GET", "POST"])
+def customerdeleteOrder(id):
+    print('displayorder')
+    order = Orders.query.get_or_404(id)
+    print('1')
+    db.session.delete(order)
+    db.session.commit()
+    return redirect(url_for('customer_Order'))
+
+@app.route('/customerdeleteLost/<int:id>',methods=["GET", "POST"])
+def customerdeleteLost(id):
+    print('displayorder')
+    lost = Lost.query.get_or_404(id)
+    print('1')
+    db.session.delete(lost)
+    db.session.commit()
+    return redirect(url_for('customer_Lost'))
+
+
+
+@app.route("/customer")
+# @login_required
+def customer():
+    print('a')
+    return render_template("Customer.html")
+
+
+@app.route('/customer_Order',methods=["GET", "POST"])
+def customer_Order():
+    print('displayorder')
+    id = session['user_id']
+    print("id : " + str(id))
+    order = request.values.get("customer_Order")
+    if order == None:
+        print(" order == None")
+        orderList = Orders.query.filter_by(user_id=id)
+    else:
+        print(" order == None else")
+        orderList = Orders.query.filter(Orders.id.like("%{}%".format(order)))        
+    return render_template("customer_Order.html", orderList=orderList )
+
+
+
+
+@app.route('/customer_Lost',methods=["GET", "POST"])
+def customer_Lost():
+    id = session['user_id']
+    print('displaycomment')
+    lost = request.values.get("customer_Lost")
+    if lost == None:
+        print("1")
+        lostList = Lost.query.filter_by(user_id=id)
+        print("2")
+    else:
+        lostList = Lost.query.filter(Lost.id.like("%{}%".format(lost)))        
+    return render_template("customer_Lost.html", lostList=lostList )
+
+
+
+#     @app.route('/search_order', methods=['GET', 'POST'])
+#    def search_order():
+#     if request.method == "POST":
+#         order = request.values.get("search_order")
+#         if 
+#         print("abc")
+#         print(order)
+#         #commentList = Comment.query.filter_by(user_id=user_id)
+#         orderList = Orders.query.filter(Orders.user_id.like("%{}%".format(order)))
+#         if orderList == None:
+#             print("cannot find the required user_id")
+#             flash("cannot find the required user_id")
+#         else:
+#             print("bbc")
+#             for order1 in orderList:
+#                 print(order1)           
+#         return render_template("admin_Order.html", orderList=orderList )
+#     else:
+#         return render_template("admin_Order.html")
 
 
 @app.route('/blog',methods=["GET", "POST"])
@@ -594,20 +818,6 @@ def resetPassword():
         return redirect(url_for('account'))
 
 
-@app.route("/admin1")
-@login_required
-def admin1():
-    id = current_user.id
-    if id is None:
-        print("id is None")
-    else:
-        print("id: " + str(id))
-    if id == 1:
-         return render_template("admin.html")
-    else:
-        print("Sorry you must be Admin")
-        flash("Sorry you must be Admin")
-        return render_template("p.html")
 
 @app.route("/cart")
 def cart():
@@ -634,11 +844,125 @@ def cart():
             subtotal = quantity * unitPrice
             totalPrice = totalPrice + subtotal
             cartitem.append(subtotal)
+            # cartitem.append(productitem)
             cartlist.append(cartitem)
+            
         return render_template("Cart.html", cartlist=cartlist, totalPrice=totalPrice)
         #return render_template('Cart.html')
     flash(f"Nothing in cart!!")
     return render_template("p.html")
+
+
+
+@app.route('/cartdelete/<cartitem>',methods=["GET", "POST"])
+def cartdelete(cartitem):
+    # cartitem = request.args.get('cartitem')
+    print("<<<<")
+    print(cartitem)
+    if "cart" in session:
+        cartLenStr = ""
+        rowIndex = 0
+        # resultIndex = -1
+        cartList = session["cart"]
+        for productitem in cartList:
+            for key, value in productitem.items():
+                if key == "id":
+                    cartLenStr = value
+                    if cartitem.find(cartLenStr) >= 0:
+                        # resultIndex = rowIndex
+                        print (cartList)
+                        removed_element = cartList.pop(rowIndex)  
+                        print(removed_element)
+                        print (cartList)
+                        print(rowIndex)
+                        if cartLenStr.find("adopt") >= 0:
+                            print("<<<< adoptitem")
+                            adoptitem_id = removed_element["product"]
+                            # startPos = removed_element.find("'product': '")
+                            # endPos = removed_element.find("', 'productTitle'")
+                            # startPos = startPos + 12
+                            # adoptitem_id = removed_element[startPos:endPos]
+                            # print(removed_element)
+                            # print(str(startPos))
+                            # print(str(endPos))
+                            print(adoptitem_id)
+                            print(">>>> adoptitem")
+                            stmt = (
+                                update(Adopt).
+                                where(Adopt.id == adoptitem_id).
+                                values(adopted = False)
+                            )
+                            db.session.execute(stmt)
+                            db.session.commit()
+                        print(">>>>")
+            rowIndex = rowIndex + 1
+        session["cart"] = cartList
+        # if resultIndex != -1:
+        #     session["cart"].pop(resultIndex, None)
+    print(session["cart"])
+    print('displayorder')
+    # session["cart"].remove(newMap)
+    print('1')
+    # return redirect(url_for('Cart.html'))
+    return redirect(url_for('cart'))
+
+# @app.route('/cartdelete/<cartitem>',methods=["GET", "POST"])
+# def cartdelete(cartitem):
+#     # cartitem = request.args.get('cartitem')
+#     print("<<<<")
+#     print(cartitem)
+#     if "cart" in session:
+#         cartLenStr = ""
+#         rowIndex = 0
+#         # resultIndex = -1
+#         for productitem in session["cart"]:
+#             for key, value in productitem.items():
+#                 if key == "id":
+#                     cartLenStr = value
+#                     if cartitem.find(cartLenStr) >= 0:
+#                         # resultIndex = rowIndex
+#                         print (session["cart"])
+#                         removed_element = session.pop(rowIndex, None)  
+#                         print(removed_element)
+#                         print (session["cart"])
+#                         print(rowIndex)
+#                         print(">>>>")
+#             rowIndex = rowIndex + 1
+#         # if resultIndex != -1:
+#         #     session["cart"].pop(resultIndex, None)
+#     print(session["cart"])
+#     print('displayorder')
+#     # session["cart"].remove(newMap)
+#     print('1')
+#     # return redirect(url_for('Cart.html'))
+#     return redirect(url_for('cart'))
+
+
+# @app.route('/cartdelete/<cartitem>',methods=["GET", "POST"])
+# def cartdelete(id):
+#     # cartitem = request.args.get('cartitem')
+#     try:
+#         session.modified = True
+#         for key , item in session['cart'].items():
+#             if int(key) == id:
+#                 print("<<<<")
+#                 print("=====")
+
+#                 print("=====")
+#                 print(session["cart"])
+#                 print(">>>>")
+#                 print('displayorder')
+#                 # session["cart"].remove(newMap)
+#                 print('1')
+#                 # return redirect(url_for('Cart.html'))
+#                 session['cart'].pop(key, None)
+#                 return redirect(url_for('cart'))
+#     except Exception as e:
+#         print(e)
+#         return redirect(url_for('cart'))
+
+
+
 
 @app.route("/wanted",methods=["GET", "POST"])
 def wanted():

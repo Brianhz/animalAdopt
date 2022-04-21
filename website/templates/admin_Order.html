@@ -68,6 +68,10 @@
           <li class="nav-item">
             <a class="nav-link" aria-current="page" href="{{ url_for('admin1')}}">Admin</a>
           {% endif %}
+          {% if current_user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="{{ url_for('customer')}}">Customer</a>
+          {% endif %}
           {% if session["username"] %}
           <li class="nav-item">
             <a class="nav-link" aria-current="page" href="{{ url_for('logout')}}">Logout</a>
@@ -100,32 +104,60 @@
       <br>
       <br>
 
+      <div class="search2-box">
+        <div class="search2-input">
+          <form action="/admin_Order" method=post>
+            <input type=text name="admin_Order" value="{{request.form.admin_Order}}" placeholder="Type to search">
+            <br>
+            <input type=reset value="Return old value">
+            <br>
+            <input type=submit value="Search">
+          <i class="fas fa-search"></i>
+          </form>
+        </div>
+      </div>
+      {% for message in get_flashed_messages() %}
+      <div class=flash>
+            {{ message }}
+      </div>
+      {% endfor %}
 
-        <div class=cart>
+
+        <div class=cart2>
       
         <table>
         <tr>
+          <th>Orderid</th>
           <th>Userid</th>
           <th>Productid</th>
           <th>Productname</th>
           <th>Quantity</th>
           <th>Price</th>
+          <th>Date Order</th>
         </tr>
-        {% for orderItem in orderlist %}
+        {% for orderItem in orderList %}
         <tr>
+          <th>{{orderItem.id}}</th>
           <th>{{orderItem.user_id}}</th>
           <th>{{orderItem.product_id}}</th>
           <th>{{orderItem.product_name}}</th>
           <th>{{orderItem.quantity}}</th>
           <th>{{orderItem.price}}</th>
+          <th>{{orderItem.date_order}}</th>
+          <!-- <th><a href="/deleteOrder/#{{ orderItem.id }}#" class="btn btn-outline-danger btn-sm">Delete</a></th> -->
+          <th><a href="{{ url_for('index')}}" class="btn btn-outline-danger btn-sm">Delete</a></th>
         </tr>
         {% endfor %}
       
         
-        </table>
-        </div>
-
+      </table>
+      </form>
+      </div>
+      {% block modal %}{%endblock%}
       {%endblock%}
 
+     
+
     </body>
+    {% block script %}{%endblock%}
     </html> 

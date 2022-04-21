@@ -69,6 +69,10 @@
 				<li class="nav-item">
 				  <a class="nav-link" aria-current="page" href="{{ url_for('admin1')}}">Admin</a>
 				{% endif %}
+				{% if current_user.is_authenticated %}
+				<li class="nav-item">
+				  <a class="nav-link" aria-current="page" href="{{ url_for('customer')}}">Customer</a>
+				{% endif %}
 				{% if session["username"] %}
 				<li class="nav-item">
 				  <a class="nav-link" aria-current="page" href="{{ url_for('logout')}}">Logout</a>
@@ -113,10 +117,12 @@
 		</tr>
 		{% for cartitem in cartlist %}
 		<tr>
-			<th>{{cartitem[1]}}</th>
 			<th>{{cartitem[2]}}</th>
 			<th>{{cartitem[3]}}</th>
 			<th>{{cartitem[4]}}</th>
+			<th>{{cartitem[5]}}</th>
+			<!-- <th><a href="/cartdelete/{{cartitem[0]}}/{{cartitem[1]}}/{{cartitem[2]}}/{{cartitem[3]}}" class="btn btn-outline-danger btn-sm">Delete</a></th> -->
+			<th><a href="{{url_for('cartdelete', cartitem=cartitem)}}" class="btn btn-outline-danger btn-sm">Delete</a></th>
 		</tr>
 		{% endfor %}
 		<tr></tr>
@@ -132,7 +138,7 @@
 <br>
 <br>
 <div class=pay>
-<a href="{{ url_for('pay')}}">Pay</a>
+<a href="{{ url_for('pay')}}">Check Out</a>
 </div>
 <br>
 <br>

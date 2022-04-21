@@ -68,6 +68,10 @@
           <li class="nav-item">
             <a class="nav-link" aria-current="page" href="{{ url_for('admin1')}}">Admin</a>
           {% endif %}
+          {% if current_user.is_authenticated %}
+          <li class="nav-item">
+            <a class="nav-link" aria-current="page" href="{{ url_for('customer')}}">Customer</a>
+          {% endif %}
           {% if session["username"] %}
           <li class="nav-item">
             <a class="nav-link" aria-current="page" href="{{ url_for('logout')}}">Logout</a>
@@ -100,24 +104,46 @@
       <br>
       <br>
 
+      
+      <div class="search2-box">
+        <div class="search2-input">
+          <form action="/admin_Comment" method=post>
+            <input type=text name="admin_Comment" value="{{request.form.admin_Comment}}" placeholder="Type to search">
+            <br>
+            <input type=reset value="Return old value">
+            <br>
+            <input type=submit value="Search">
+          <i class="fas fa-search"></i>
+          </form>
+        </div>
+      </div>
+      {% for message in get_flashed_messages() %}
+      <div class=flash>
+            {{ message }}
+      </div>
+      {% endfor %}
 
-        <div class=cart>
+
+      <div class=cart1>
       
         <table>
         <tr>
           <th>Userid</th>
           <th>Comment</th>
+          <th>Date Comment</th>
         </tr>
-        {% for commentItem in commentlist %}
+        {% for commentItem in commentList %}
         <tr>
           <th>{{commentItem.user_id}}</th>
           <th>{{commentItem.comment}}</th>
+          <th>{{commentItem.date_comment}}</th>
+          <th><a href="/deleteOpinion/{{ commentItem.id }}" class="btn btn-outline-danger btn-sm">Delete</a></th>
         </tr>
         {% endfor %}
       
         
         </table>
-        </div>
+      </div>
 
 
       {%endblock%}
