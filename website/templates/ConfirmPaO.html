@@ -1,0 +1,43 @@
+{% extends 'admin_Order.html' %}
+{% block modal %}
+<div class="modal_fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Confirm</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="/deleteOrder" method=post>
+          <!-- <input type=hidden name="orderId" value="{{request.form.deleteOrder}}" placeholder="Password">
+          <input type=text name="deleteOrder" value="{{request.form.deleteOrder}}" placeholder="Password"> -->
+          <input type="text" name="password" placeholder="password">
+          <input type="hidden" name="orderId" placeholder="orderId" value={{orderId}}>
+          <input type=submit value="Delete">
+        <!-- <form>
+          <div class="form-group">
+            <label for="message-text" class="col-form-label">Password:</label> -->
+          </div>
+        </form>
+        <a href="{{url_for('admin_Order')}}" class="btn btn-outline-danger btn-sm" data-dismiss="modal">Close</a>
+      </div>
+      
+      <!-- <div class="modal-footer">
+        <a href="{{url_for('ConfirmPaO')}}" class="btn btn-outline-danger btn-sm" data-dismiss="modal">Close</a>
+         <a href="/deleteOrder/orderID" class="btn btn-outline-danger btn-sm" data-dismiss="modal">Delete</a>
+        </div> -->
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block script %}
+<script>
+$(document).ready(function(){
+    console.log("window is loaded")
+    $("#exampleModal").modal("show")
+})
+</script>
+{% endblock %}

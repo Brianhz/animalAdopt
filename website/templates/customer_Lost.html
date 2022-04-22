@@ -136,15 +136,20 @@
           <th>{{lostPost.title}}</th>
           <th>{{lostPost.date_lostposted}}</th>
           <th>{{lostPost.description}}</th>
-          <th><a href="/customerdeleteLost/{{ lostPost.id }}" class="btn btn-outline-danger btn-sm">Delete</a></th>
+          <th><a href="{{ url_for('ConfirmPcL', lostId=lostPost.id)}}" class="btn btn-outline-danger btn-sm">Delete</a></th>
+
         </tr>
         {% endfor %}
       
         
-        </table>
-        </div>
-
+      </table>
+      </form>
+      </div>
+      {% block modal %}{%endblock%}
       {%endblock%}
 
+     
+
     </body>
+    {% block script %}{%endblock%}
     </html> 

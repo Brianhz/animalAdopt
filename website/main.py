@@ -540,6 +540,17 @@ def admin_Comment():
         commentList = Comment.query.filter(Comment.user_id.like("%{}%".format(comment)) | Comment.comment.like("%{}%".format(comment)) | Comment.date_comment.like("%{}%".format(comment)))        
     return render_template("admin_Comment.html", commentList=commentList )
 
+@app.route("/ConfirmPaC")
+def ConfirmPaC():
+    print('displayorder2')
+    commentId = request.values.get("commentId")
+    # order2 = request.values.get("admin_Order")
+    # if orderId == None:
+    #     orderList = Orders.query.all()
+    # else:
+    #     orderList = Orders.query.filter(Orders.user_id.like("%{}%".format(orderId)) | Orders.product_id.like("%{}%".format(order))| Orders.product_name.like("%{}%".format(order))| Orders.quantity.like("%{}%".format(order))| Orders.price.like("%{}%".format(order))| Orders.date_order.like("%{}%".format(order))) 
+    #  return render_template("index.html", orderList=orderList, orderId=orderId)
+    return render_template("ConfirmPaC.html", commentId=commentId)
 
 @app.route('/admin_Order',methods=["GET", "POST"])
 def admin_Order():
@@ -552,53 +563,158 @@ def admin_Order():
         orderList = Orders.query.filter(Orders.user_id.like("%{}%".format(order)) | Orders.product_id.like("%{}%".format(order))| Orders.product_name.like("%{}%".format(order))| Orders.quantity.like("%{}%".format(order))| Orders.price.like("%{}%".format(order))| Orders.date_order.like("%{}%".format(order)))        
     return render_template("admin_Order.html", orderList=orderList )
 
-@app.route("/index")
-def index():
+@app.route("/ConfirmPaO")
+def ConfirmPaO():
     print('displayorder2')
-    order = request.values.get("admin_Order")
+    orderId = request.values.get("orderId")
     # order2 = request.values.get("admin_Order")
-    if order == None:
-        orderList = Orders.query.all()
-    else:
-        orderList = Orders.query.filter(Orders.user_id.like("%{}%".format(order)) | Orders.product_id.like("%{}%".format(order))| Orders.product_name.like("%{}%".format(order))| Orders.quantity.like("%{}%".format(order))| Orders.price.like("%{}%".format(order))| Orders.date_order.like("%{}%".format(order))) 
-    return render_template("index.html", orderList=orderList)
+    # if orderId == None:
+    #     orderList = Orders.query.all()
+    # else:
+    #     orderList = Orders.query.filter(Orders.user_id.like("%{}%".format(orderId)) | Orders.product_id.like("%{}%".format(order))| Orders.product_name.like("%{}%".format(order))| Orders.quantity.like("%{}%".format(order))| Orders.price.like("%{}%".format(order))| Orders.date_order.like("%{}%".format(order))) 
+    #  return render_template("index.html", orderList=orderList, orderId=orderId)
+    return render_template("ConfirmPaO.html", orderId=orderId)
 
-@app.route('/deleteOrder/<int:id>',methods=["GET", "POST"])
-def deleteOrder(id):
-    print('displayorder')
-    order = Orders.query.get_or_404(id)
-    print('1')
-    db.session.delete(order)
-    db.session.commit()
+
+# @app.route('/deleteOrder/<int:id>',methods=["GET", "POST"])
+# def deleteOrder(id):
+#     print('displayorder')
+#     order = Orders.query.get_or_404(id)
+#     print('1')
+#     db.session.delete(order)
+#     db.session.commit()
+#     return redirect(url_for('admin_Order'))
+
+# @app.route('/deleteOrder/<int:id>',methods=["GET", "POST"])
+# def deleteOrder(id):
+#     print('displayorder3')
+#     password = request.values.get("deleteOrder")
+#     if password == User.password:
+#         order = Orders.query.get_or_404(id)
+#         print('1')
+#         db.session.delete(order)
+#         db.session.commit()
+#         return redirect(url_for('admin_Order'))
+#     else:
+#         flash("Wrong Password!!")
+#         print('worng password')
+#     return redirect(url_for('admin_Order'))
+
+@app.route('/deleteOrder',methods=["GET", "POST"])
+def deleteOrder():
+    print('displayorder - /deleteOrder')
+    password = request.values.get("password")
+    orderId = request.values.get('orderId')
+    print("password: " + password)
+    print("orderId: " + orderId)
+
+    if 'username' in session:
+        print("1000000000")
+        username = session['username']
+        userRec = User.query.filter_by(username=username, password=password).first()
+
+        if userRec != None:
+            print("20000000")
+        # if password == User.password:
+            order = Orders.query.filter_by(id=orderId).first()
+            if order != None:
+                print('1')
+                db.session.delete(order)
+                db.session.commit()
+                return redirect(url_for('admin_Order'))
+        else:
+            flash("Wrong Password!!")
+            print('worng password')
     return redirect(url_for('admin_Order'))
 
-@app.route('/deleteOpinion/<int:id>',methods=["GET", "POST"])
-def deleteOpinion(id):
-    print('displayorder')
-    comment = Comment.query.get_or_404(id)
-    print('1')
-    db.session.delete(comment)
-    db.session.commit()
+
+
+
+@app.route('/deleteOpinion',methods=["GET", "POST"])
+def deleteOpinion():
+    print('displayopinion - /displayopinion')
+    password = request.values.get("password")
+    commentId = request.values.get('commentId')
+    print("password: " + password)
+    print("commentId: " + commentId)
+
+    if 'username' in session:
+        print("1000000000")
+        username = session['username']
+        userRec = User.query.filter_by(username=username, password=password).first()
+
+        if userRec != None:
+            print("20000000")
+        # if password == User.password:
+            comment = Comment.query.filter_by(id=commentId).first()
+            if comment != None:
+                print('1')
+                db.session.delete(comment)
+                db.session.commit()
+                return redirect(url_for('admin_Comment'))
+        else:
+            flash("Wrong Password!!")
+            print('worng password')
     return redirect(url_for('admin_Comment'))
 
-@app.route('/customerdeleteOrder/<int:id>',methods=["GET", "POST"])
-def customerdeleteOrder(id):
-    print('displayorder')
-    order = Orders.query.get_or_404(id)
-    print('1')
-    db.session.delete(order)
-    db.session.commit()
-    return redirect(url_for('customer_Order'))
+# @app.route('/deleteOpinion/<int:id>',methods=["GET", "POST"])
+# def deleteOpinion(id):
+#     print('displayorder')
+#     comment = Comment.query.get_or_404(id)
+#     print('1')
+#     db.session.delete(comment)
+#     db.session.commit()
+#     return redirect(url_for('admin_Comment'))
 
-@app.route('/customerdeleteLost/<int:id>',methods=["GET", "POST"])
-def customerdeleteLost(id):
-    print('displayorder')
-    lost = Lost.query.get_or_404(id)
-    print('1')
-    db.session.delete(lost)
-    db.session.commit()
+
+# @app.route('/customerdeleteLost/<int:id>',methods=["GET", "POST"])
+# def customerdeleteLost(id):
+#     print('displayorder')
+#     lost = Lost.query.get_or_404(id)
+#     print('1')
+#     db.session.delete(lost)
+#     db.session.commit()
+#     return redirect(url_for('customer_Lost'))
+
+@app.route('/customerdeleteLost',methods=["GET", "POST"])
+def customerdeleteLost():
+    print('displaylost - /displaylost')
+    password = request.values.get("password")
+    lostId = request.values.get('lostId')
+    print("password: " + password)
+    print("commentId: " + lostId)
+
+    if 'username' in session:
+        print("1000000000")
+        username = session['username']
+        userRec = User.query.filter_by(username=username, password=password).first()
+
+        if userRec != None:
+            print("20000000")
+        # if password == User.password:
+            lost = Lost.query.filter_by(id=lostId).first()
+            if lost != None:
+                print('1')
+                db.session.delete(lost)
+                db.session.commit()
+                return redirect(url_for('customer_Lost'))
+        else:
+            flash("Wrong Password!!")
+            print('worng password')
     return redirect(url_for('customer_Lost'))
 
+
+@app.route("/ConfirmPcL")
+def ConfirmPcL():
+    print('displayorder2')
+    lostId = request.values.get("lostId")
+    # order2 = request.values.get("admin_Order")
+    # if orderId == None:
+    #     orderList = Orders.query.all()
+    # else:
+    #     orderList = Orders.query.filter(Orders.user_id.like("%{}%".format(orderId)) | Orders.product_id.like("%{}%".format(order))| Orders.product_name.like("%{}%".format(order))| Orders.quantity.like("%{}%".format(order))| Orders.price.like("%{}%".format(order))| Orders.date_order.like("%{}%".format(order))) 
+    #  return render_template("index.html", orderList=orderList, orderId=orderId)
+    return render_template("ConfirmPcL.html", lostId=lostId)
 
 
 @app.route("/customer")

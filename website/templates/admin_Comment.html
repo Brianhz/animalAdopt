@@ -137,16 +137,20 @@
           <th>{{commentItem.user_id}}</th>
           <th>{{commentItem.comment}}</th>
           <th>{{commentItem.date_comment}}</th>
-          <th><a href="/deleteOpinion/{{ commentItem.id }}" class="btn btn-outline-danger btn-sm">Delete</a></th>
+          <!-- <th><a href="/deleteOpinion/{{ commentItem.id }}" class="btn btn-outline-danger btn-sm">Delete</a></th> -->
+          <th><a href="{{ url_for('ConfirmPaC', commentId=commentItem.id)}}" class="btn btn-outline-danger btn-sm">Delete</a></th>
         </tr>
         {% endfor %}
       
         
-        </table>
-      </div>
+      </table>
+    </form>
+    </div>
+    {% block modal %}{%endblock%}
+    {%endblock%}
 
+   
 
-      {%endblock%}
-
-    </body>
+  </body>
+  {% block script %}{%endblock%}
     </html> 

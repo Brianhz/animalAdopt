@@ -145,7 +145,7 @@
           <th>{{orderItem.price}}</th>
           <th>{{orderItem.date_order}}</th>
           <!-- <th><a href="/deleteOrder/#{{ orderItem.id }}#" class="btn btn-outline-danger btn-sm">Delete</a></th> -->
-          <th><a href="{{ url_for('index')}}" class="btn btn-outline-danger btn-sm">Delete</a></th>
+          <th><a href="{{ url_for('ConfirmPaO', orderId=orderItem.id)}}" class="btn btn-outline-danger btn-sm">Delete</a></th>
         </tr>
         {% endfor %}
       
