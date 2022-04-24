@@ -657,6 +657,10 @@ def deleteOpinion():
             print('worng password')
     return redirect(url_for('admin_Comment'))
 
+
+
+# do not delete !!!!!!!
+
 # @app.route('/deleteOpinion/<int:id>',methods=["GET", "POST"])
 # def deleteOpinion(id):
 #     print('displayorder')
@@ -665,6 +669,8 @@ def deleteOpinion():
 #     db.session.delete(comment)
 #     db.session.commit()
 #     return redirect(url_for('admin_Comment'))
+
+# !!!!!!!!
 
 
 # @app.route('/customerdeleteLost/<int:id>',methods=["GET", "POST"])
